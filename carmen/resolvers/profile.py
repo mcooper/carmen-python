@@ -15,11 +15,18 @@ NORMALIZATION_RE = re.compile(r'\s+|\W')
 def normalize(location_name, preserve_commas=False):
     """Normalize *location_name* by stripping punctuation and collapsing
     runs of whitespace, and return the normalized name."""
-    def replace(match):
-        if preserve_commas and ',' in match.group(0):
-            return ','
-        return ' '
-    return NORMALIZATION_RE.sub(replace, location_name).strip().lower()
+    try:
+        location_name.encode('ascii')
+    except UnicodeEncodeError:
+        return location_name
+    except UnicodeDecodeError:
+        return location_name
+    else:
+        def replace(match):
+            if preserve_commas and ',' in match.group(0):
+                return ','
+            return ' '
+        return NORMALIZATION_RE.sub(replace, location_name).strip().lower()
 
 
 @register('profile')
@@ -38,22 +45,26 @@ class ProfileResolver(AbstractResolver):
         for alias in aliases:
             if alias in aliases_already_added:
                 continue
-            if alias in self.location_name_to_location:
-                warnings.warn('Duplicate location name "%s"' % str(alias))
+            #if alias in self.location_name_to_location:
+                #warnings.warn('Duplicate location name "%s"' % str(alias))
             else:
-                self.location_name_to_location[alias] = location
+                self.location_name_to_location[alias.encode('utf-8')] = location
             # Additionally add a normalized version of the alias
             # stripped of punctuation, and with runs of whitespace
             # reduced to single spaces.
+            
             normalized = normalize(alias)
             if normalized != alias:
                 aliases.append(normalized)
             aliases_already_added.add(alias)
 
+    def give_location_data(self):
+        return(self.location_name_to_location)
+
     def resolve_tweet(self, tweet):
         import sys
         location_string = tweet.get('user', {}).get('location', '')
-            
+        
         if not location_string:
             return None
 
@@ -62,17 +73,17 @@ class ProfileResolver(AbstractResolver):
         if normalized in self.location_name_to_location:
             return (False, self.location_name_to_location[normalized])
         # Try again with commas.
-        normalized = normalize(location_string, preserve_commas=True)
-        match = STATE_RE.search(normalized)
-        if match:
-            after_comma = match.group(1)
-            location_name = None
-            if after_comma in US_STATES or after_comma in COUNTRIES:
-                location_name = after_comma
-            elif after_comma in US_STATE_ABBREVIATIONS:
-                location_name = US_STATE_ABBREVIATIONS[after_comma]
-            elif after_comma in COUNTRY_CODES:
-                location_name = COUNTRY_CODES[after_comma]
-            if location_name in self.location_name_to_location:
-                return (False, self.location_name_to_location[location_name])
+        #normalized = normalize(location_string, preserve_commas=True)
+        #match = STATE_RE.search(normalized)
+        #if match:
+        #    after_comma = match.group(1)
+        #    location_name = None
+        #    if after_comma in US_STATES or after_comma in COUNTRIES:
+        #        location_name = after_comma
+        #    elif after_comma in US_STATE_ABBREVIATIONS:
+        #        location_name = US_STATE_ABBREVIATIONS[after_comma]
+        #    elif after_comma in COUNTRY_CODES:
+        #        location_name = COUNTRY_CODES[after_comma]
+        #    if location_name in self.location_name_to_location:
+        #        return (False, self.location_name_to_location[location_name])
         return None

@@ -108,7 +108,7 @@ def main():
                 resolved_tweets += 1
             json_output = json.dumps(tweet, cls=LocationEncoder).encode()
             output_file.write(json_output)
-            output_file.write(bytes('\n'.encode(encoding='ascii')))
+            output_file.write(bytes('\n'.encode(encoding='utf-8')))
             total_tweets += 1
         
     if args.statistics:

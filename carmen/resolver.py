@@ -74,6 +74,10 @@ class ResolverCollection(AbstractResolver):
         for resolver_name, resolver in self.resolvers:
             resolver.add_location(location)
 
+    def give_location_data(self):
+        for resolver_name, resolver in self.resolvers:
+            data = resolver.give_location_data()
+        return(data)
 
     def resolve_tweet(self, tweet):
         provisional_resolution = None
