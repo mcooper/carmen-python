@@ -72,18 +72,14 @@ class ProfileResolver(AbstractResolver):
 
         if normalized in self.location_name_to_location:
             return (False, self.location_name_to_location[normalized])
-        # Try again with commas.
-        #normalized = normalize(location_string, preserve_commas=True)
-        #match = STATE_RE.search(normalized)
-        #if match:
-        #    after_comma = match.group(1)
-        #    location_name = None
-        #    if after_comma in US_STATES or after_comma in COUNTRIES:
-        #        location_name = after_comma
-        #    elif after_comma in US_STATE_ABBREVIATIONS:
-        #        location_name = US_STATE_ABBREVIATIONS[after_comma]
-        #    elif after_comma in COUNTRY_CODES:
-        #        location_name = COUNTRY_CODES[after_comma]
-        #    if location_name in self.location_name_to_location:
-        #        return (False, self.location_name_to_location[location_name])
+        
+        #Try again splitting commas
+        normalized = normalize(location_string, preserve_commas=True)
+
+        splits = normalized.split(', ')
+
+        for s in splits:
+            if s in self.location_name_to_location:
+                return (False, self.location_name_to_location[s])
+
         return None
