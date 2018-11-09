@@ -18,8 +18,4 @@ To run the Carmen frontend, see:
 
     $ python -m carmen.cli --help
 
-This version has been modified my Conservation International to include the following changes:
-* Only matches from the users profile (other resolvers will likely not work)
-* Only returns the country for a toponym (not the lat/long)
-* Includes a vastly expanded database with all cities over 20k people, all countries, admin 1 and admin 2 names, as well as extensive alternate spellings and names for a given toponym.
-* Works with unicode, allowing geocoding user locations that are not ascii.
+This version has been modified to identify toponyms in academic abstracts
